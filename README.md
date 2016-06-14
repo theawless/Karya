@@ -1,4 +1,4 @@
-# Sarcha
+# Karya
 A voice controlled assistant for Linux.
 
 ### (Probable) Features
