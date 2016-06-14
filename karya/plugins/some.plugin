@@ -1,0 +1,9 @@
+[Plugin]
+Loader=python3
+Module=some
+IAge=3
+Name=Some
+Icon=dictonator
+Description=Example plugin for karya.
+Authors=Abhinav Singh <abhiabhiabhiabhinav@gmail.com>
+Copyright=Copyright © 2016 Abhinav Singh <abhiabhiabhiabhinav@gmail.com>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.20.0 -->
+<!--
+Sarcina - A voice tasker/assistant for Ubuntu.
+Copyright (C) <2016>  <Abhinav Singh>
+Copyright (C) <2016>  <Abhinav Prince>
+Copyright (C) <2016>  <Suraj Jha>
+Copyright (C) <2016>  <Harshit Rai>
+
+This file is part of Sarcina.
+
+Sarcina is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Sarcina is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Sarcina.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<interface>
+  <requires lib="gtk+" version="3.10"/>
+  <object class="GtkAboutDialog" id="AboutDialog">
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes">About Karya</property>
+    <property name="destroy_with_parent">True</property>
+    <property name="icon_name">sarcina</property>
+    <property name="type_hint">dialog</property>
+    <property name="program_name">Karya</property>
+    <property name="copyright" translatable="yes">Copyright ©  2016 Abhinav Singh</property>
+    <property name="comments" translatable="yes">A voice controlled assistant for Ubuntu.</property>
+    <property name="website">https://github.com/theawless/Karya</property>
+    <property name="website_label" translatable="yes">Github</property>
+    <property name="authors">Abhinav Prince</property>
+    <property name="logo_icon_name">karya</property>
+    <property name="license_type">gpl-3-0</property>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>
