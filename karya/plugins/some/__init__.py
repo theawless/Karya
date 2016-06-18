@@ -1,26 +1,27 @@
 import gi
 
 gi.require_version('Peas', '1.0')
+gi.require_version('Gtk', '3.0')
 from gi.repository import GObject, Peas
 
 
-class ExampleAppActivatable(GObject.Object, Peas.Activatable):
-    __gtype_name__ = 'PythonHelloPlugin'
+class Search(GObject.Object, Peas.Activatable):
+    __gtype_name__ = 'ExamplePlugin'
     object = GObject.Property(type=GObject.Object)
-    data = GObject.Property(type=GObject.Object)
 
-    def do_activate(self):
-        print('some activate')
-        print(self.data)
+    def __init__(self):
+        super().__init__()
+        self.activator = None
 
-    def do_deactivate(self):
-        print('some deactivate')
-
-    def do_update_state(self):
+    def on_menu_button_click(self, widget):
         pass
 
-    def get_data(self, data):
-        print(data.value)
+    def do_activate(self):
+        print('activated example plugin')
+        pass
 
+    def do_deactivate(self):
+        pass
 
-print('yo')
+    def get_activator(self, activator):
+        self.activator = activator

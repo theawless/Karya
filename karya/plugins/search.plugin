@@ -1,0 +1,9 @@
+[Plugin]
+Loader=python3
+Module=search
+IAge=3
+Name=Search
+Icon=edit-find
+Description=Search online or offline.
+Authors=Abhinav Singh <abhiabhiabhiabhinav@gmail.com>
+Copyright=Copyright © 2016 Abhinav Singh <abhiabhiabhiabhinav@gmail.com>

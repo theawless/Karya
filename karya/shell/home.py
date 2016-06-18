@@ -9,14 +9,15 @@ class Home(Gtk.Box):
         super().__init__()
         self.sidebar = Gtk.StackSidebar()
         self.stack = Gtk.Stack()
+        self.sidebar.set_size_request(150,100)
         self.add(self.sidebar)
-        self.add(self.stack)
+        self.pack_start(self.stack, True, True, 0)
         self.setup_stack()
 
     def setup_stack(self):
         self.stack.set_transition_type(Gtk.StackTransitionType.SLIDE_UP_DOWN)
         self.sidebar.set_stack(self.stack)
-        self.add_to_stack('Hello World', 'Hello', Gtk.Box())
+        self.add_to_stack('main', 'Updates', Gtk.Box())
         self.stack.show_all()
         self.sidebar.show_all()
 

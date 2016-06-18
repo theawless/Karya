@@ -38,7 +38,6 @@ class Window(Gtk.ApplicationWindow):
 
     def setup_header_menu(self):
         menu_button = Gtk.MenuButton()
-
         menu_button.set_image(Gtk.Image.new_from_icon_name('preferences-system', Gtk.IconSize.SMALL_TOOLBAR))
         menu = Gio.Menu()
         plugin_item = Gio.MenuItem.new('Plugins', 'win.plugins')
@@ -46,6 +45,7 @@ class Window(Gtk.ApplicationWindow):
         menu.append_item(plugin_item)
         menu.append_item(settings_item)
 
+        self.menu_button = menu_button
         popover = Gtk.Popover()
         popover.bind_model(menu)
         menu_button.set_popover(popover)

@@ -10,7 +10,6 @@ from shell.window import Window
 
 
 class Application(Gtk.Application):
-    # constructor for the Gtk Application
 
     def __init__(self):
         Gtk.Application.__init__(self)
