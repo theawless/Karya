@@ -1,27 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Generated with glade 3.20.0 -->
-<!--
-Sarcina - A voice tasker/assistant for Ubuntu.
-Copyright (C) <2016>  <Abhinav Singh>
-Copyright (C) <2016>  <Abhinav Prince>
-Copyright (C) <2016>  <Suraj Jha>
-Copyright (C) <2016>  <Harshit Rai>
-
-This file is part of Sarcina.
-
-Sarcina is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-Sarcina is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with Sarcina.  If not, see <http://www.gnu.org/licenses/>.
--->
 <interface>
   <requires lib="gtk+" version="3.10"/>
   <object class="GtkAboutDialog" id="AboutDialog">
@@ -35,7 +13,7 @@ along with Sarcina.  If not, see <http://www.gnu.org/licenses/>.
     <property name="comments" translatable="yes">A voice controlled assistant for Ubuntu.</property>
     <property name="website">https://github.com/theawless/Karya</property>
     <property name="website_label" translatable="yes">Github</property>
-    <property name="authors">Abhinav Prince</property>
+    <property name="authors">Abhinav Singh</property>
     <property name="logo_icon_name">karya</property>
     <property name="license_type">gpl-3-0</property>
     <child internal-child="vbox">

@@ -2,13 +2,11 @@ import sys
 
 import gi
 
-gi.require_version('PeasGtk', '1.0')
-gi.require_version('Peas', '1.0')
+from utilities.variables import ABOUT_UI_PATH
+
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GLib, Gio
 from shell.window import Window
-from shell.about import AboutPage
-from utilities.pluginmanager import PluginManager
 
 
 class Application(Gtk.Application):
@@ -18,14 +16,12 @@ class Application(Gtk.Application):
         Gtk.Application.__init__(self)
         GLib.set_application_name("Karya")
         GLib.set_prgname('karya')
-        self.plugin_manager = PluginManager()
         self._window = None
+        # Settings()
 
     def build_app_menu(self):
         action_entries = [
             ('about', self.about),
-            ('settings', self.configure),
-            ('plugins', self.plugins),
             ('help', self.help),
             ('quit', self.quit),
         ]
@@ -41,20 +37,20 @@ class Application(Gtk.Application):
         Gtk.Application.do_startup(self)
         self.build_app_menu()
 
-    def plugins(self, action, param):
-        self.plugin_manager.add_gui(self._window)
-
     def help(self, action, param):
-        pass
+        print('help')
 
     def about(self, action, param):
-        AboutPage(self._window)
-
-    def configure(self, action, param):
-        pass
+        ui = Gtk.Builder()
+        ui.add_from_file(ABOUT_UI_PATH)
+        dialog = ui.get_object("AboutDialog")
+        dialog.set_transient_for(self._window)
+        dialog.set_modal(True)
+        dialog.show_all()
 
     def quit(self, action, param):
-        self._window.destroy()
+        if self._window is not None:
+            self._window.destroy()
         sys.exit()
 
     def do_activate(self):
