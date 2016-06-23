@@ -1,15 +1,21 @@
+import os
+
 import gi
 
 gi.require_version('Peas', '1.0')
 gi.require_version('Gtk', '3.0')
 from gi.repository import GObject, Gtk, Peas
-from utilities.variables import PLUGIN_SEARCH_UI_PATH
-from plugins.search.LocalSearch import LocalSearch
-from plugins.search.OnlineSearch import OnlineSearch
+
+PLUGIN_PATH = os.path.dirname(os.path.abspath(__file__))
+PLUGIN_SEARCH_UI_PATH = PLUGIN_PATH + '/ui/search.glade'
+
+from .OnlineSearch import OnlineSearch
+from .LocalSearch import LocalSearch
+from .common import SearchCommon
 
 
 class Search(GObject.Object, Peas.Activatable):
-    __gtype_name__ = 'SearchPlugin'
+    __gtype_name__ = 'SearchPlugins'
     object = GObject.Property(type=GObject.Object)
 
     def __init__(self):
@@ -20,9 +26,9 @@ class Search(GObject.Object, Peas.Activatable):
         self.local_searcher = LocalSearch()
         self.online_searhcer = OnlineSearch()
         self.box = self.ui.get_object('SearchFullBox')
-        self.menu_button = Gtk.Button()
-        self.menu_button.set_image(Gtk.Image.new_from_icon_name('edit-find', Gtk.IconSize.SMALL_TOOLBAR))
-        self.menu_button.connect('clicked', self.on_menu_button_click)
+        self.tool_button = Gtk.ToolButton()
+        self.tool_button.set_icon_widget(Gtk.Image.new_from_icon_name('edit-find', Gtk.IconSize.SMALL_TOOLBAR))
+        self.tool_button.connect('clicked', self.on_menu_button_click)
 
     def on_menu_button_click(self, widget):
         self.home_stack = self.activator.get_home_stack()
@@ -30,9 +36,10 @@ class Search(GObject.Object, Peas.Activatable):
 
     def do_activate(self):
         print('search activated')
-        self.activator.add_gui('search', 'Search', self.box, self.menu_button)
+        self.activator.add_gui('search', 'Search', self.box, self.tool_button)
         self.box.show_all()
-        self.menu_button.show_all()
+        self.tool_button.show_all()
+        SearchCommon(self.ui)
 
     def do_deactivate(self):
         pass

@@ -2,7 +2,7 @@ import sys
 
 import gi
 
-from utilities.variables import ABOUT_UI_PATH
+from shell.about import AboutPage
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GLib, Gio
@@ -10,7 +10,6 @@ from shell.window import Window
 
 
 class Application(Gtk.Application):
-
     def __init__(self):
         Gtk.Application.__init__(self)
         GLib.set_application_name("Karya")
@@ -40,12 +39,7 @@ class Application(Gtk.Application):
         print('help')
 
     def about(self, action, param):
-        ui = Gtk.Builder()
-        ui.add_from_file(ABOUT_UI_PATH)
-        dialog = ui.get_object("AboutDialog")
-        dialog.set_transient_for(self._window)
-        dialog.set_modal(True)
-        dialog.show_all()
+        AboutPage(self._window)
 
     def quit(self, action, param):
         if self._window is not None:

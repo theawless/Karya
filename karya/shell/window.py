@@ -45,12 +45,11 @@ class Window(Gtk.ApplicationWindow):
         menu.append_item(plugin_item)
         menu.append_item(settings_item)
 
-        self.menu_button = menu_button
         popover = Gtk.Popover()
         popover.bind_model(menu)
         menu_button.set_popover(popover)
         menu_button.show_all()
-        self.header_bar.pack_start(menu_button)
+        self.header_bar.pack_end(menu_button)
 
         plugins_action = Gio.SimpleAction(name='plugins')
         plugins_action.connect('activate', self.cb_menu, 'plugins')
@@ -74,4 +73,4 @@ class Window(Gtk.ApplicationWindow):
         self.header_bar.show_all()
 
     def add_plugin_menu_box(self, plugin_menu_box):
-        self.header_bar.pack_start(plugin_menu_box)
+        self.header_bar.pack_end(plugin_menu_box)
