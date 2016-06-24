@@ -6,7 +6,7 @@ gi.require_version('Gtk', '3.0')
 
 from gi.repository import Gtk, Peas, PeasGtk
 
-from utilities.variables import DEFAULT_PLUGIN_PATH
+from utilities.variables import DEFAULT_PLUGIN_PATH, LOADED_PLUGIN_INI_PATH
 
 
 class PluginManager:
@@ -20,6 +20,11 @@ class PluginManager:
         self.extension_set = Peas.ExtensionSet.new(self.plugin_engine, Peas.Activatable, [])
         self.extension_set.connect("extension-added", self.on_extension_added)
         self.extension_set.connect("extension-removed", self.on_extension_removed)
+
+        self.load_saved_plugins()
+        # After we load plugin we connect to these signals, now we can edit the saved file.
+        self.plugin_engine.connect_after("load-plugin", self.update_saved_loaded_plugins)
+        self.plugin_engine.connect_after("unload-plugin", self.update_saved_loaded_plugins)
 
     def add_gui(self, window):
         dialog = Gtk.Dialog()
@@ -36,3 +41,16 @@ class PluginManager:
 
     def on_extension_removed(self, set, info, activatable):
         activatable.deactivate()
+
+    def update_saved_loaded_plugins(self, engine=None, plugin=None):
+        with open(LOADED_PLUGIN_INI_PATH, 'w+') as file:
+            for plugin in self.plugin_engine.get_loaded_plugins():
+                file.write(plugin + '\n')
+
+    def load_saved_plugins(self):
+        try:
+            with open(LOADED_PLUGIN_INI_PATH, 'r') as file:
+                load_list = [line.rstrip() for line in file]
+                self.plugin_engine.set_loaded_plugins(load_list)
+        except FileNotFoundError:
+            self.update_saved_loaded_plugins()

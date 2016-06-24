@@ -1,8 +1,8 @@
 [Plugin]
 Loader=python3
-Module=some
+Module=example
 IAge=3
-Name=Some
+Name=Example
 Icon=dictonator
 Description=Example plugin for karya.
 Authors=Abhinav Singh <abhiabhiabhiabhinav@gmail.com>

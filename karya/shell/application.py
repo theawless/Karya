@@ -7,6 +7,7 @@ from shell.about import AboutPage
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GLib, Gio
 from shell.window import Window
+from settings.settings import SpeechSettings
 
 
 class Application(Gtk.Application):
@@ -15,7 +16,7 @@ class Application(Gtk.Application):
         GLib.set_application_name("Karya")
         GLib.set_prgname('karya')
         self._window = None
-        # Settings()
+        SpeechSettings()
 
     def build_app_menu(self):
         action_entries = [

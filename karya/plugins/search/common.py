@@ -3,7 +3,7 @@ import gi
 gi.require_version('Gtk', '3.0')
 from .LocalSearch import LocalSearch
 from .OnlineSearch import OnlineSearch
-
+import threading
 
 class SearchCommon:
     def __init__(self, ui):
@@ -16,6 +16,7 @@ class SearchCommon:
         self.search_entry = self.ui.get_object('SearchEntry')
         self.search_entry.connect('search_changed', self.search_changed)
         self.local_searcher.connect('result-found', self.result_found)
+        self.search_thread=threading.main_thread()
 
     def result_found(self, local_searcher, path, file):
         print('result_found' + str(file) + str(path))

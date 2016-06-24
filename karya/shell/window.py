@@ -6,6 +6,7 @@ from shell.home import Home
 from shell.tasker.tasker import Tasker
 from utilities.pluginmanager import PluginManager
 from utilities.activator import Activator
+from settings.settings import ConfigurableDialog
 
 
 class Window(Gtk.ApplicationWindow):
@@ -63,6 +64,7 @@ class Window(Gtk.ApplicationWindow):
             self.plugin_manager.add_gui(self)
         elif user_data == 'settings':
             print('settings')
+            ConfigurableDialog(self)
         else:
             print('window menu unknown')
 
