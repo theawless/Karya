@@ -6,7 +6,7 @@ from shell.home import Home
 from shell.tasker.tasker import Tasker
 from utilities.pluginmanager import PluginManager
 from utilities.activator import Activator
-from settings.settings import ConfigurableDialog
+from settings.speechsettings import ConfigurableDialog
 
 
 class Window(Gtk.ApplicationWindow):
@@ -14,7 +14,7 @@ class Window(Gtk.ApplicationWindow):
         Gtk.ApplicationWindow.__init__(self, application=app, title="Karya")
         self.set_size_request(800, 600)
         self.set_icon_name('karya')
-
+        self.app = app
         self.header_bar = Gtk.HeaderBar()
         self.stack_switcher = Gtk.StackSwitcher()
         self.stack = Gtk.Stack()
@@ -24,7 +24,7 @@ class Window(Gtk.ApplicationWindow):
         self.setup_header_menu()
         self.setup_header_bar()
 
-        self.activator = Activator(app, self, self.home, None)
+        self.activator = Activator(self.app, self, self.home, self.app.speech_recogniser)
         self.plugin_manager = PluginManager(self.activator)
 
     def setup_stack(self):

@@ -7,7 +7,9 @@ from shell.about import AboutPage
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GLib, Gio
 from shell.window import Window
-from settings.settings import SpeechSettings
+from settings.speechsettings import SpeechSettingsHandler
+
+from speech.speechrecogniser import SpeechRecogniser
 
 
 class Application(Gtk.Application):
@@ -16,7 +18,9 @@ class Application(Gtk.Application):
         GLib.set_application_name("Karya")
         GLib.set_prgname('karya')
         self._window = None
-        SpeechSettings()
+        # initialize the settings
+        SpeechSettingsHandler()
+        self.speech_recogniser = SpeechRecogniser()
 
     def build_app_menu(self):
         action_entries = [
