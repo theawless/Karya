@@ -1,20 +1,24 @@
 import configparser
 import copy
 
-from gi.repository import Gtk
+from gi.repository import Gtk, GObject
 
 from utilities.variables import CONFIG_INI_PATH, CONFIG_UI_PATH
 
 
-class SpeechSettings:
+class SpeechSettingsHandler(GObject.GObject):
     # A static variable in all instances
-    settings = dict()
+    speech_settings = dict()
+    __gsignals__ = {
+        'changed': (GObject.SIGNAL_RUN_FIRST, None, ())
+    }
 
     def __init__(self):
+        GObject.GObject.__init__(self)
         self.load_settings()
 
-    @classmethod
-    def default_settings(cls):
+    @staticmethod
+    def default_settings():
         config = configparser.ConfigParser()
         config['Main'] = {'recogniser': 'WITAI', 'dynamic_noise_suppression': 'False'}
         config['Sphinx'] = {'version': 'pocketsphinx'}
@@ -25,14 +29,8 @@ class SpeechSettings:
         config['IBM'] = {'username': '', 'password': ''}
         return config
 
-    @classmethod
-    def load_settings(cls):
-        config = SpeechSettings.default_settings()
-        config.read(CONFIG_INI_PATH)
-        cls.settings = cls.config_to_dict(config)
-
-    @classmethod
-    def config_to_dict(cls, config: configparser.ConfigParser):
+    @staticmethod
+    def config_to_dict(config: configparser.ConfigParser):
         settings_dictionary = {}
         for sect in config.sections():
             settings_dictionary[sect] = {}
@@ -40,10 +38,13 @@ class SpeechSettings:
                 settings_dictionary[sect][opt] = config.get(sect, opt)
         return settings_dictionary
 
-    @classmethod
-    def save_settings(cls, settings: dict):
-        cls.settings = settings
-        config = cls.default_settings()
+    def load_settings(self):
+        config = self.default_settings()
+        config.read(CONFIG_INI_PATH)
+        self.__class__.speech_settings = self.config_to_dict(config)
+
+    def save_settings(self, settings: dict):
+        config = self.default_settings()
         config['Main'] = {'recogniser': settings['Main']['recogniser'],
                           'dynamic_noise_suppression': settings['Main']['dynamic_noise_suppression']}
         config['Google'] = {'api_key': settings['Google']['api_key']}
@@ -54,11 +55,14 @@ class SpeechSettings:
         # Write new values to the configuration file
         with open(CONFIG_INI_PATH, 'w+') as configfile:
             config.write(configfile)
+        self.__class__.speech_settings = settings
+        self.emit('changed')
 
 
 class ConfigurableDialog:
     def __init__(self, window):
-        self.settings = copy.deepcopy(SpeechSettings.settings)
+        self.settings_handler = SpeechSettingsHandler()
+        self.settings = copy.deepcopy(self.settings_handler.speech_settings)
         self.ui = Gtk.Builder()
         self.ui.add_from_file(CONFIG_UI_PATH)
         self.dialog = self.ui.get_object("configure_dialog")
@@ -157,8 +161,8 @@ class ConfigurableDialog:
 
     def _set_default_config(self, button):
         # load default settigns and save them by calling mainsettings class
-        self.settings = SpeechSettings.config_to_dict(SpeechSettings.default_settings())
-        SpeechSettings.save_settings(self.settings)
+        self.settings = self.settings_handler.config_to_dict(self.settings_handler.default_settings())
+        self.settings_handler.save_settings(self.settings)
         self._get_saved_into_text_boxes()
         self._populate_buttons()
 
@@ -171,4 +175,4 @@ class ConfigurableDialog:
         self.settings['IBM']['password'] = self.ui.get_object("ibm_password_entry").get_text()
         self.settings['APIAI']['api_key'] = self.ui.get_object("apiai_key_entry").get_text()
         # save to main settings
-        SpeechSettings.save_settings(self.settings)
+        self.settings_handler.save_settings(self.settings)
