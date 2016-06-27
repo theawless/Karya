@@ -5,6 +5,8 @@ from gi.repository import GLib, GObject
 
 from settings.speechsettings import SpeechSettingsHandler
 
+PREPARE_DURATION = 2
+
 
 class SpeechStates(Enum):
     started = 0
@@ -30,7 +32,7 @@ class ThreadObject(GObject.GObject):
 
 class SpeechRecogniser(ThreadObject):
     __gsignals__ = {
-        'state_changed': (GObject.SIGNAL_RUN_FIRST, None, (str, str, str))
+        'state_changed': (GObject.SIGNAL_RUN_FIRST, None, (object, str, str))
     }
 
     def __init__(self):
@@ -44,11 +46,11 @@ class SpeechRecogniser(ThreadObject):
         self.noise_level = None
         self.settings = SpeechSettingsHandler.speech_settings
 
-        # self.connect_after('state_changed', )
         print("Speech Recogniser initialised")
 
+    # called automatically after each state change
     def do_state_changed(self, q, w, e):
-        print('state_changed')
+        print('state_changed', q, w, e)
 
     def start_recognising(self):
         if not self.is_prepared:
@@ -64,12 +66,12 @@ class SpeechRecogniser(ThreadObject):
     def setup_recogniser(self):
         self.emit('state_changed', SpeechStates.preparing, "", "Preparing...")
         if self.is_listening:
-            self.re.adjust_for_ambient_noise(self.source, duration=2)
+            self.re.adjust_for_ambient_noise(self.source, duration=PREPARE_DURATION)
             self.emit('state_changed', SpeechStates.prepared, "", "Prepared. Speak!")
         elif not self.is_listening:
             with self.mic as source:
                 self.source = source
-                self.re.adjust_for_ambient_noise(source, duration=2)
+                self.re.adjust_for_ambient_noise(source, duration=PREPARE_DURATION)
                 self.emit('state_changed', SpeechStates.prepared, "", "Done preparing.")
         self.is_prepared = True
 

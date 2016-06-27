@@ -8,28 +8,27 @@ A voice controlled assistant for Linux.
   * Change, minimize windows
   * Change menus
   * Clipboard
-* Ask questions to google
-* Search for files locally/on web
+* Plugin system with easy to make plugins
 * A customized homepage showing important notifications
+* Integration with GNOME calender
 * Dictate text into any text box
-* Edit commands, add more commands
-* App indicators
+* Beautiful, follows GNOME guidelines
+* App indicators (small window mode)
 * Notifications
 * Sudo access lets you set tasks (recurring and periodic)
 
 ### (Possible) Plugins
+* Text templates plugin
+* Add more commands plugin
+* Ask questions to google
+* Search for files locally/on web
 * Rhythmbox plugin
 * Gedit plugin
 * Facebook plugin
-* Text templates plugin
 * Calculator
 
-### Aim
-* To have a voice open source assistant for our beloved linux 
-* To get accepted as an official GNOME project
-
 ### Scope
-* Can make it more Intelligent using Natural Language Processing, AI.
+* To make it more Intelligent using Natural Language Processing, AI.
 * Use of intents
 * Use of hand gestures to move mouse
 
@@ -45,20 +44,22 @@ A voice controlled assistant for Linux.
 * [PocketSphinx Python Wrappers](https://github.com/cmusphinx/pocketsphinx)
 
 ### License
-Dict'O'nator is released under **GNU GPL v3**
+Karya is released under **GNU GPL v3**
 
 See LICENSE to read the terms of the GNU General Public License  
 You can also visit <http://www.gnu.org/licenses/> to read the terms.
 
 ### Attributes
+Speech
+License: BSD  
+[Uberi Speech Recognition](https://github.com/Uberi/speech_recognition/tree/master/examples)
 
 Basic plugin codes  
 License: GPl v2  
 [Gedit Wiki](https://wiki.gnome.org/Apps/Gedit/PythonPluginHowTo)
 
-Speech
-License: BSD  
-[Uberi Speech Recognition](https://github.com/Uberi/speech_recognition/tree/master/examples)
+Plugin system in libpeas  
+[lzone.de](http://lzone.de/How+to+write+GObject+Introspection+based+Plugins)
 
 text2num library  
 License: MIT  

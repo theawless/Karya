@@ -9,7 +9,7 @@ class Home(Gtk.Box):
         super().__init__()
         self.sidebar = Gtk.StackSidebar()
         self.stack = Gtk.Stack()
-        self.sidebar.set_size_request(150,100)
+        self.sidebar.set_size_request(150, 100)
         self.add(self.sidebar)
         self.pack_start(self.stack, True, True, 0)
         self.setup_stack()

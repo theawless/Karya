@@ -6,8 +6,9 @@ from gi.repository import Gtk, GObject
 from utilities.variables import CONFIG_INI_PATH, CONFIG_UI_PATH
 
 
+# LEGACY code - very old
 class SpeechSettingsHandler(GObject.GObject):
-    # A static variable in all instances
+    # a static variable in all instances
     speech_settings = dict()
     __gsignals__ = {
         'changed': (GObject.SIGNAL_RUN_FIRST, None, ())
@@ -52,7 +53,7 @@ class SpeechSettingsHandler(GObject.GObject):
         config['APIAI'] = {'api_key': settings['APIAI']['api_key']}
         config['Bing'] = {'api_key': settings['Bing']['api_key']}
         config['IBM'] = {'username': settings['IBM']['username'], 'password': settings['IBM']['password']}
-        # Write new values to the configuration file
+        # write new values to the configuration file
         with open(CONFIG_INI_PATH, 'w+') as configfile:
             config.write(configfile)
         self.__class__.speech_settings = settings
@@ -89,7 +90,6 @@ class ConfigurableDialog:
         self.ui.get_object("apiai_key_entry").set_text(_settings['APIAI']['api_key'])
 
     def _connect_everything(self):
-        # Connecting all radios,buttons to the callback function
         self.ui.get_object("sphinx_radio").connect("toggled", self._radio_callback, "Sphinx")
         self.ui.get_object("bing_radio").connect("toggled", self._radio_callback, "Bing")
         self.ui.get_object("google_radio").connect("toggled", self._radio_callback, "Google")
@@ -104,7 +104,6 @@ class ConfigurableDialog:
         self.ui.get_object("close_button").connect("clicked", self.on_close_dialog)
 
     def _populate_buttons(self):
-        # Load the radio buttons with settings
         _settings = self.settings
 
         if _settings['Main']['recogniser'] == "Sphinx":
@@ -126,7 +125,7 @@ class ConfigurableDialog:
             self.ui.get_object("dynamic_check_button").set_active(False)
 
     def _choose_labelled_input_boxes(self):
-        # Disable everything"
+        # Disable everything
         for child in self.ui.get_object("input_box"):
             child.set_sensitive(False)
 
@@ -150,7 +149,6 @@ class ConfigurableDialog:
             self.ui.get_object("ibm_password_label").set_sensitive(True)
 
     def _radio_callback(self, radio, data):
-        # Define what happens when Radio options are selected
         if radio.get_active():
             # All radio_callback are called simultaneously, checking which one went active
             self.settings['Main']['recogniser'] = data
@@ -160,7 +158,7 @@ class ConfigurableDialog:
         self.settings['Main']['dynamic_noise_suppression'] = str(check.get_active())
 
     def _set_default_config(self, button):
-        # load default settigns and save them by calling mainsettings class
+        # load default settings and save them by calling mainsettings class
         self.settings = self.settings_handler.config_to_dict(self.settings_handler.default_settings())
         self.settings_handler.save_settings(self.settings)
         self._get_saved_into_text_boxes()

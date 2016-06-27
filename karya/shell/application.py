@@ -18,11 +18,11 @@ class Application(Gtk.Application):
         GLib.set_application_name("Karya")
         GLib.set_prgname('karya')
         self._window = None
-        # initialize the settings
+        # initialize the settings once
         SpeechSettingsHandler()
         self.speech_recogniser = SpeechRecogniser()
 
-    def build_app_menu(self):
+    def _build_app_menu(self):
         action_entries = [
             ('about', self.about),
             ('help', self.help),
@@ -34,11 +34,13 @@ class Application(Gtk.Application):
             simple_action.connect('activate', callback)
             self.add_action(simple_action)
             menu.append_item(Gio.MenuItem.new(action.title(), "app." + action))
+
+        # TO-DO non gnome desktops do not show proper menu
         self.set_app_menu(menu)
 
     def do_startup(self):
         Gtk.Application.do_startup(self)
-        self.build_app_menu()
+        self._build_app_menu()
 
     def help(self, action, param):
         print('help')

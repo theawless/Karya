@@ -1,3 +1,5 @@
+# an alternative to activatable
+# private variables and public functions which shall be provided to the plugins
 class Activator:
     def __init__(self, app, window, home, speech_recogniser):
         self._app = app
