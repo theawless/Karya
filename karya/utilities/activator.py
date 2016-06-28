@@ -1,5 +1,10 @@
 # an alternative to activatable
 # private variables and public functions which shall be provided to the plugins
+import logging
+
+logger = logging.getLogger(__name__)
+
+
 class Activator:
     def __init__(self, app, window, home, speech_recogniser):
         self._app = app
@@ -9,14 +14,14 @@ class Activator:
 
     def add_gui(self, name, title, stack_box, plugins_box=None):
         if name == '' or title == '' or stack_box is None:
-            print('Trying to add empty stuff to home')
+            logger.debug('Trying to add empty stuff to home')
             return
         if self._home.stack.get_child_by_name(name) is not None:
-            print('Adding child twice')
+            logger.debug('Adding child twice')
             return
         self._home.add_to_stack(name, title, stack_box)
         if plugins_box is None:
-            print('Not adding menu')
+            logger.debug('Not adding menu')
             return
         self._window.add_plugin_menu_box(plugins_box)
 

@@ -6,11 +6,22 @@ gi.require_version('Gtk', '3.0')
 
 from gi.repository import Gtk, Peas, PeasGtk
 
-from utilities.variables import DEFAULT_PLUGIN_PATH, LOADED_PLUGIN_INI_PATH
+from utilities.variables import DEFAULT_PLUGIN_PATH
+from settings.mainsettings import PluginConfigurationHandler
+from gi.repository import GObject
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
-class PluginManager:
+class PluginManager(GObject.GObject):
+    __gsignals__ = {
+        'settings_changed': (GObject.SIGNAL_RUN_FIRST, None, ())
+    }
+
     def __init__(self, activator):
+        GObject.GObject.__init__(self)
         # an alternate to activatable
         self.activator = activator
 
@@ -18,17 +29,26 @@ class PluginManager:
         self.plugin_engine.add_search_path(DEFAULT_PLUGIN_PATH, DEFAULT_PLUGIN_PATH)
         self.plugin_engine.enable_loader('python3')
 
-        # getting weird GObject.Parameter errors, hence the different way of activatable
+        # getting weird GObject.Parameter errors, hence the different way of activatable - notice the empty list
         self.extension_set = Peas.ExtensionSet.new(self.plugin_engine, Peas.Activatable, [])
 
         self.extension_set.connect("extension-added", self.on_extension_added)
         self.extension_set.connect("extension-removed", self.on_extension_removed)
 
-        self.load_saved_plugins()
+        self.settings_handler = PluginConfigurationHandler(self, [''])
+        self.settings_handler.connect('settings_loaded', self.on_settings_loaded)
+        self.settings_handler.load_settings()
+        self.plugin_engine.connect_after("load-plugin", self.on_load_plugin)
+        self.plugin_engine.connect_after("unload-plugin", self.on_unload_plugin)
 
-        # after each load/unload plugin we edit the saved file.
-        self.plugin_engine.connect_after("load-plugin", self.update_saved_loaded_plugins)
-        self.plugin_engine.connect_after("unload-plugin", self.update_saved_loaded_plugins)
+    def on_settings_loaded(self, settings_handler, config):
+        self.plugin_engine.set_loaded_plugins(config.get_list('Main', 'loaded_plugins'))
+
+    def on_load_plugin(self, plugin_engine, plugin):
+        self.emit('settings_changed')
+
+    def on_unload_plugin(self, plugin_engine, plugin):
+        self.emit('settings_changed')
 
     def add_gui(self, window):
         dialog = Gtk.Dialog()
@@ -46,16 +66,3 @@ class PluginManager:
 
     def on_extension_removed(self, set, info, activatable):
         activatable.deactivate()
-
-    def update_saved_loaded_plugins(self, engine=None, plugin=None):
-        with open(LOADED_PLUGIN_INI_PATH, 'w+') as file:
-            for plugin in self.plugin_engine.get_loaded_plugins():
-                file.write(plugin + '\n')
-
-    def load_saved_plugins(self, engine=None, plugin=None):
-        try:
-            with open(LOADED_PLUGIN_INI_PATH, 'r') as file:
-                load_list = [line.rstrip() for line in file]
-                self.plugin_engine.set_loaded_plugins(load_list)
-        except FileNotFoundError:
-            self.update_saved_loaded_plugins()
