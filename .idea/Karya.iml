@@ -5,6 +5,7 @@
       <sourceFolder url="file://$MODULE_DIR$/karya" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/.idea" />
+      <excludeFolder url="file://$MODULE_DIR$/karya/.logs" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.5.1 (/usr/bin/python3.5)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

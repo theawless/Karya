@@ -1,5 +1,6 @@
 import gi
 
+from settings.speechsettings import SpeechSettingsHandler
 from shell.windowelements import WindowElements
 from speech.speechrecogniser import SpeechRecogniser, SpeechStates
 
@@ -10,6 +11,11 @@ from gi.repository import Gtk, Gdk
 class SpeechInfoBar(WindowElements):
     def __init__(self, window):
         super().__init__(window)
+
+        # initialize the speech settings once
+        self.speech_settings = SpeechSettingsHandler()
+        self.speech_settings.load_settings()
+
         self.info_bar = Gtk.InfoBar()
         self._setup_status_label()
         self._setup_infobar_menu()
@@ -54,7 +60,6 @@ class SpeechInfoBar(WindowElements):
             self.speech_recogniser.start_recognising()
 
     def on_speech_state_changed(self, speech_recogniser, state, recognised_text, msg):
-        print(state, recognised_text, msg)
         if state == SpeechStates.started:
             self.speech_status_label.set_text('Speak!')
         if state == SpeechStates.preparing:

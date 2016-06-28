@@ -1,30 +1,37 @@
 import gi
 
+from settings.mainsettings import WindowConfigurationHandler
 from shell.speechinfobar import SpeechInfoBar
 
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gio, GObject
+from gi.repository import Gtk, Gio, GObject, Gdk
 from utilities.pluginmanager import PluginManager
 from utilities.activator import Activator
-from settings.speechsettings import ConfigurableDialog
-
+from settings.speechsettings import SpeechConfigurableDialog
 from shell.toolbar import Toolbar
 from shell.view import View
 from shell.windowelements import WindowModes, WindowElements
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class Window(Gtk.ApplicationWindow, WindowElements):
     __gsignals__ = {
-        'mode_changed': (GObject.SIGNAL_RUN_FIRST, None, (object,))
+        'mode_changed': (GObject.SIGNAL_RUN_FIRST, None, (object,)),
+        'settings_changed': (GObject.SIGNAL_RUN_FIRST, None, ())
     }
 
     def __init__(self, app):
         Gtk.ApplicationWindow.__init__(self, application=app, title="Karya")
         # instead of window we send None, refer WindowElements
         WindowElements.__init__(self, None)
-        self.set_size_request(800, 600)
         self.set_icon_name('karya')
         self.app = app
+        # to provide fallback if build app menu failed
+        self.set_show_menubar(True)
+        self.set_gravity(Gdk.Gravity.CENTER)
         self.window_box = Gtk.VBox()
         self.window_box.show()
         self.window_box.set_homogeneous(False)
@@ -47,31 +54,59 @@ class Window(Gtk.ApplicationWindow, WindowElements):
         self.plugin_manager = PluginManager(self.activator)
 
         self.window_mode = None
-        # first start is large window
-        self.on_window_change(self, WindowModes.large)
+
+        self.settings_handler = WindowConfigurationHandler(self)
+        self.settings_handler.connect('settings_loaded', self.on_settings_loaded)
+        self.settings_handler.load_settings()
+        self.connect('delete-event', self.on_window_delete_event)
+
+    def on_window_delete_event(self, window, event):
+        self.emit('settings_changed')
 
     def response_info_bar(self, widget, response):
+        self.emit('settings_changed')
         if response == Gtk.ResponseType.CLOSE:
             self.app.quit(None, None)
 
     def mode_button_clicked(self, widget):
-        # flip modes
+        # flip modes and save settings of current mode
+        self.emit('settings_changed')
         if self.window_mode == WindowModes.large:
             self.on_window_change(self, WindowModes.small)
         elif self.window_mode == WindowModes.small:
             self.on_window_change(self, WindowModes.large)
 
+    def on_settings_loaded(self, settings_handler, config):
+        name = config['Main']['Window']
+        window_mode = None
+        if name == WindowModes.large.name:
+            window_mode = WindowModes.large
+        elif name == WindowModes.small.name:
+            window_mode = WindowModes.small
+        self.on_window_change(self, window_mode)
+
+    def change_window_mode(self, mode, size_x, size_y, pos_x, pos_y):
+        self.window_mode = mode
+        self.emit('mode-changed', mode)
+        self.resize(size_x, size_y)
+        self.move(pos_x, pos_y)
+
     def on_window_change_large(self):
-        self.window_mode = WindowModes.large
-        self.emit('mode-changed', self.window_mode)
-        self.set_size_request(800, 600)
-        self.resize(1, 1)
+        config = self.settings_handler.config
+        mode = WindowModes.large
+        name = mode.name
+        self.change_window_mode(mode, config.getint(name, 'size_X'), config.getint(name, 'size_Y'),
+                                config.getint(name, 'position_X'), config.getint(name, 'position_Y')
+                                )
 
     def on_window_change_small(self):
-        self.window_mode = WindowModes.small
-        self.emit('mode-changed', self.window_mode)
-        self.set_size_request(0, 0)
-        self.resize(1, 1)
+        config = self.settings_handler.config
+        mode = WindowModes.small
+        name = mode.name
+        self.change_window_mode(mode,
+                                config.getint(name, 'size_X'), config.getint(name, 'size_Y'),
+                                config.getint(name, 'position_X'), config.getint(name, 'position_Y')
+                                )
 
     # gui buttons are created by toolbar
     def _setup_actions(self):
@@ -86,10 +121,9 @@ class Window(Gtk.ApplicationWindow, WindowElements):
         if user_data == 'plugins':
             self.plugin_manager.add_gui(self)
         elif user_data == 'settings':
-            print('settings')
-            ConfigurableDialog(self)
+            SpeechConfigurableDialog(self)
         else:
-            print('window menu unknown')
+            logging.debug('window menu unknown')
 
     def add_plugin_menu_box(self, plugin_menu_box):
         self.toolbar.header_bar.pack_end(plugin_menu_box)

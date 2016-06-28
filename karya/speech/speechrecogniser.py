@@ -1,3 +1,4 @@
+import logging
 from enum import Enum
 
 import speech_recognition as sr
@@ -5,6 +6,7 @@ from gi.repository import GLib, GObject
 
 from settings.speechsettings import SpeechSettingsHandler
 
+logger = logging.getLogger(__name__)
 PREPARE_DURATION = 2
 
 
@@ -44,11 +46,11 @@ class SpeechRecogniser(ThreadObject):
         self.is_listening = False
         self.is_prepared = False
         self.noise_level = None
-        self.settings = SpeechSettingsHandler.speech_settings
+        self.settings = SpeechSettingsHandler.config
 
     # called automatically after each state change
     def do_state_changed(self, state, recognised_txt, msg):
-        print('state_changed', state, recognised_txt, msg)
+        logger.debug('state_changed', state, recognised_txt, msg)
         if state is SpeechStates.fatal_error:
             self.stop_recognising()
 
@@ -97,10 +99,10 @@ class SpeechRecogniser(ThreadObject):
         if sel == "Sphinx":
             # Use Sphinx as recogniser
             self.emit('state_changed', SpeechStates.recognising, "", "Got your words! Processing with Sphinx")
-            print("recognize speech using Sphinx")
+            logger.debug("recognize speech using Sphinx")
             try:
                 recognized_text = r.recognize_sphinx(audio)
-                print("From recogSpeech module: " + recognized_text)
+                logger.debug("From recogSpeech module: " + recognized_text)
             except sr.UnknownValueError:
                 self.emit('state_changed', SpeechStates.error, "", "Sphinx could not understand audio")
             except sr.RequestError as e:
@@ -114,10 +116,10 @@ class SpeechRecogniser(ThreadObject):
                 google_api_key = settings['Google']['api_key']
                 self.emit('state_changed', SpeechStates.recognising, "",
                           "Got your words! Processing with Google Speech Recognition")
-                print("recognize speech using Google Key Speech Recognition")
+                logger.debug("recognize speech using Google Key Speech Recognition")
                 try:
                     recognized_text = r.recognize_google(audio, google_api_key)
-                    print("From recogSpeech module G : " + recognized_text)
+                    logger.debug("From recogSpeech module G : " + recognized_text)
                 except sr.UnknownValueError:
                     self.emit('state_changed', SpeechStates.error, "",
                               "Google Speech Recognition could not understand audio")
@@ -129,10 +131,10 @@ class SpeechRecogniser(ThreadObject):
             else:
                 self.emit('state_changed', SpeechStates.recognising, "",
                           "Got your words! Processing with Google Speech Recognition")
-                print("recognize speech using Google Speech Recognition")
+                logger.debug("recognize speech using Google Speech Recognition")
                 try:
                     recognized_text = r.recognize_google(audio)
-                    print("From recogSpeech module G : " + recognized_text)
+                    logger.debug("From recogSpeech module G : " + recognized_text)
                 except sr.UnknownValueError:
                     self.emit('state_changed', SpeechStates.error, "",
                               "Google Speech Recognition could not understand audio")
@@ -145,13 +147,13 @@ class SpeechRecogniser(ThreadObject):
         elif sel == "WITAI":
             # recognize speech using Wit.ai
             self.emit('state_changed', SpeechStates.recognising, "", "Got your words! Processing with WIT.AI")
-            print("recognize speech using WitAI Speech Recognition")
+            logger.debug("recognize speech using WitAI Speech Recognition")
 
             wit_ai_key = settings['WITAI']['api_key']
             # Wit.ai keys are 32-character uppercase alphanumeric strings
             try:
                 recognized_text = r.recognize_wit(audio, key=wit_ai_key)
-                print("Wit.ai thinks you said " + recognized_text)
+                logger.debug("Wit.ai thinks you said " + recognized_text)
             except sr.UnknownValueError:
                 self.emit('state_changed', SpeechStates.error, "", "Wit.ai could not understand audio")
             except sr.RequestError as e:
@@ -163,11 +165,11 @@ class SpeechRecogniser(ThreadObject):
         elif sel == "Bing":
             # recognize speech using Microsoft Bing Voice Recognition
             self.emit('state_changed', SpeechStates.recognising, "", "Got your words! Processing with Bing")
-            print("recognize speech using Bing Speech Recognition")
+            logger.debug("recognize speech using Bing Speech Recognition")
             bing_key = settings['Bing']['api_key']
             try:
                 recognized_text = r.recognize_bing(audio, key=bing_key)
-                print("Microsoft Bing Voice Recognition thinks you said " + recognized_text)
+                logger.debug("Microsoft Bing Voice Recognition thinks you said " + recognized_text)
             except sr.UnknownValueError:
                 self.emit('state_changed', SpeechStates.error, "",
                           "Microsoft Bing Voice Recognition could not understand audio")
@@ -180,12 +182,12 @@ class SpeechRecogniser(ThreadObject):
         elif sel == "APIAI":
             # recognize speech using api.ai
             self.emit('state_changed', SpeechStates.recognising, "", "Got your words! Processing with API.AI")
-            print("recognize speech using APIAI Speech Recognition")
+            logger.debug("recognize speech using APIAI Speech Recognition")
 
             api_ai_client_access_token = settings['APIAI']['api_key']
             try:
                 recognized_text = r.recognize_api(audio, client_access_token=api_ai_client_access_token)
-                print("api.ai thinks you said " + recognized_text)
+                logger.debug("api.ai thinks you said " + recognized_text)
             except sr.UnknownValueError:
                 self.emit('state_changed', SpeechStates.error, "", "api.ai could not understand audio")
             except sr.RequestError as e:
@@ -197,7 +199,7 @@ class SpeechRecogniser(ThreadObject):
         elif sel == "IBM":
             # recognize speech using IBM Speech to Text
             self.emit('state_changed', SpeechStates.recognising, "", "Got your words! Processing with IBM")
-            print("recognize speech using IBM Speech Recognition")
+            logger.debug("recognize speech using IBM Speech Recognition")
 
             ibm_username = settings['IBM']['username']
             # IBM Speech to Text usernames are strings of the form XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
@@ -205,7 +207,7 @@ class SpeechRecogniser(ThreadObject):
             # IBM Speech to Text passwords are mixed-case alphanumeric strings
             try:
                 recognized_text = r.recognize_ibm(audio, username=ibm_username, password=ibm_password)
-                print("IBM Speech to Text thinks you said " + recognized_text)
+                logger.debug("IBM Speech to Text thinks you said " + recognized_text)
             except sr.UnknownValueError:
                 self.emit('state_changed', SpeechStates.error, "", "IBM Speech to Text could not understand audio")
             except sr.RequestError as e:
