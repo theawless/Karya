@@ -9,8 +9,6 @@ from gi.repository import Gtk, GLib, Gio
 from shell.window import Window
 from settings.speechsettings import SpeechSettingsHandler
 
-from speech.speechrecogniser import SpeechRecogniser
-
 
 class Application(Gtk.Application):
     def __init__(self):
@@ -18,9 +16,9 @@ class Application(Gtk.Application):
         GLib.set_application_name("Karya")
         GLib.set_prgname('karya')
         self._window = None
+
         # initialize the settings once
         SpeechSettingsHandler()
-        self.speech_recogniser = SpeechRecogniser()
 
     def _build_app_menu(self):
         action_entries = [

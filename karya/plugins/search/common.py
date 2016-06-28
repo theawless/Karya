@@ -11,7 +11,7 @@ class SearchCommon:
         self.online_searcher = OnlineSearch()
         self.ui = ui
         self.local_list = self.ui.get_object('LocalListBox')
-        self.local_list.show()
+        self.local_list.change_to_large()
         self.online_list = self.ui.get_object('OnlineListBox')
         self.search_entry = self.ui.get_object('SearchEntry')
         self.search_entry.connect('search_changed', self.search_changed)

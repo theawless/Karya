@@ -46,11 +46,11 @@ class SpeechRecogniser(ThreadObject):
         self.noise_level = None
         self.settings = SpeechSettingsHandler.speech_settings
 
-        print("Speech Recogniser initialised")
-
     # called automatically after each state change
-    def do_state_changed(self, q, w, e):
-        print('state_changed', q, w, e)
+    def do_state_changed(self, state, recognised_txt, msg):
+        print('state_changed', state, recognised_txt, msg)
+        if state is SpeechStates.fatal_error:
+            self.stop_recognising()
 
     def start_recognising(self):
         if not self.is_prepared:
@@ -58,31 +58,31 @@ class SpeechRecogniser(ThreadObject):
         if not self.is_listening:
             self.re_stopper = self.re.listen_in_background(self.mic, self.recog_callback)
             self.is_listening = True
-            self.emit('state_changed', SpeechStates.started, "", "Speak!")
+            self.emit('state_changed', SpeechStates.started, "", "")
         else:
             self.stop_recognising()
             self.start_recognising()
 
     def setup_recogniser(self):
-        self.emit('state_changed', SpeechStates.preparing, "", "Preparing...")
+        self.emit('state_changed', SpeechStates.preparing, "", "")
         if self.is_listening:
             self.re.adjust_for_ambient_noise(self.source, duration=PREPARE_DURATION)
-            self.emit('state_changed', SpeechStates.prepared, "", "Prepared. Speak!")
+            self.emit('state_changed', SpeechStates.prepared, "", "")
         elif not self.is_listening:
             with self.mic as source:
                 self.source = source
                 self.re.adjust_for_ambient_noise(source, duration=PREPARE_DURATION)
-                self.emit('state_changed', SpeechStates.prepared, "", "Done preparing.")
+                self.emit('state_changed', SpeechStates.prepared, "", "")
         self.is_prepared = True
 
     def stop_recognising(self):
         if self.is_listening:
-            self.emit('state_changed', SpeechStates.stopping, "", "Stopping Dictation!")
+            self.emit('state_changed', SpeechStates.stopping, "", "")
             self.re_stopper()
-            self.emit('state_changed', SpeechStates.stopped, '', "Stopped listening.")
+            self.emit('state_changed', SpeechStates.stopped, '', "")
             self.is_listening = False
         else:
-            self.emit('state_changed', SpeechStates.stopped, "", "Already OFF")
+            self.emit('state_changed', SpeechStates.stopped, "", "")
 
     def recog_callback(self, r, audio):
         """

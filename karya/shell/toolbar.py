@@ -1,11 +1,15 @@
 import gi
 
+from shell.windowelements import WindowElements
+
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gio
 
+
 # contains header bar and later (possibly) search bar
-class Toolbar:
-    def __init__(self):
+class Toolbar(WindowElements):
+    def __init__(self, window):
+        super().__init__(window)
         self.header_bar = Gtk.HeaderBar()
         self._setup_header_bar()
         self._setup_header_menu()
@@ -30,3 +34,9 @@ class Toolbar:
         menu_button.set_popover(popover)
         menu_button.show_all()
         self.header_bar.pack_end(menu_button)
+
+    def on_window_change_small(self):
+        self.header_bar.hide()
+
+    def on_window_change_large(self):
+        self.header_bar.show()
