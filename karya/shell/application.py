@@ -7,7 +7,9 @@ from shell.about import AboutPage
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GLib, Gio
 from shell.window import Window
-from settings.speechsettings import SpeechSettingsHandler
+import logging
+
+logger = logging.getLogger('YO')
 
 
 class Application(Gtk.Application):
@@ -16,9 +18,7 @@ class Application(Gtk.Application):
         GLib.set_application_name("Karya")
         GLib.set_prgname('karya')
         self._window = None
-
-        # initialize the settings once
-        SpeechSettingsHandler()
+        logger.log(2, 's')
 
     def _build_app_menu(self):
         action_entries = [
@@ -32,8 +32,6 @@ class Application(Gtk.Application):
             simple_action.connect('activate', callback)
             self.add_action(simple_action)
             menu.append_item(Gio.MenuItem.new(action.title(), "app." + action))
-
-        # TO-DO non gnome desktops do not show proper menu
         self.set_app_menu(menu)
 
     def do_startup(self):
@@ -41,7 +39,7 @@ class Application(Gtk.Application):
         self._build_app_menu()
 
     def help(self, action, param):
-        print('help')
+        logger.debug('help')
 
     def about(self, action, param):
         AboutPage(self._window)
