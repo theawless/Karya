@@ -29,17 +29,21 @@ class Window(Gtk.ApplicationWindow, WindowElements):
         WindowElements.__init__(self, None)
         self.set_icon_name('karya')
         self.app = app
-        # to provide fallback if build app menu failed
-        self.set_show_menubar(True)
+
+        self.toolbar = Toolbar(self)
+        self._setup_actions()
+        self.set_titlebar(self.toolbar.header_bar)
+
+        # to provide alternate fallback if build app menu failed
+        self.set_show_menubar(False)
+        if not self.app.prefers_app_menu():
+            self.toolbar.build_alternate_app_menu(self.app)
+
         self.set_gravity(Gdk.Gravity.CENTER)
         self.window_box = Gtk.VBox()
         self.window_box.show()
         self.window_box.set_homogeneous(False)
         self.add(self.window_box)
-
-        self.toolbar = Toolbar(self)
-        self._setup_actions()
-        self.set_titlebar(self.toolbar.header_bar)
 
         self.speech_info_bar = SpeechInfoBar(self)
         self.window_box.pack_start(self.speech_info_bar.info_bar, False, False, 0)

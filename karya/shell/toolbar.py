@@ -35,6 +35,16 @@ class Toolbar(WindowElements):
         menu_button.show_all()
         self.header_bar.pack_end(menu_button)
 
+    def build_alternate_app_menu(self, app):
+        menu_button = Gtk.MenuButton()
+        menu_button.set_image(Gtk.Image.new_from_icon_name('karya', Gtk.IconSize.SMALL_TOOLBAR))
+        menu = app.build_app_menu()
+        popover = Gtk.Popover()
+        popover.bind_model(menu)
+        menu_button.set_popover(popover)
+        menu_button.show_all()
+        self.header_bar.pack_start(menu_button)
+
     def on_window_change_small(self):
         self.header_bar.hide()
 
