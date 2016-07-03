@@ -1,7 +1,5 @@
 import gi
 
-from shell.windowelements import WindowModeSubscribers
-
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 from shell.home import Home

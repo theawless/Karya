@@ -1,15 +1,17 @@
 import logging
 
-from settings.configurationhandler import ConfigurationHandler
+from settings.configurationhandler import ConfigurationHandler, ListConfigParser
 from shell.windowelements import WindowModes
-from utilities.variables import WINDOW_STATE_INI_PATH, LOADED_PLUGIN_INI_PATH
+from utilities.variables import LOADED_PLUGIN_INI_PATH, WINDOW_STATE_INI_PATH
 
 logger = logging.getLogger(__name__)
 
 
 class WindowConfigurationHandler(ConfigurationHandler):
+    config = ListConfigParser()
+
     def __init__(self, app):
-        super().__init__(app, WINDOW_STATE_INI_PATH)
+        super().__init__(self.config, app, WINDOW_STATE_INI_PATH)
 
     def save_settings(self, obj):
         window = obj.current_window
@@ -30,9 +32,11 @@ class WindowConfigurationHandler(ConfigurationHandler):
 
 
 class PluginConfigurationHandler(ConfigurationHandler):
+    config = ListConfigParser()
+
     def __init__(self, plugin_manager, default_plugins):
         self.default_plugins = default_plugins
-        super().__init__(plugin_manager, LOADED_PLUGIN_INI_PATH)
+        super().__init__(self.config, plugin_manager, LOADED_PLUGIN_INI_PATH)
 
     def save_settings(self, obj):
         plugin_list = self.obj.plugin_engine.get_loaded_plugins()

@@ -10,7 +10,6 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GLib, Gio, GObject
 
 from settings.mainsettings import WindowConfigurationHandler
-from settings.speechsettings import SpeechSettingsHandler
 from shell.windowelements import WindowModeSubscribers, WindowModes
 from speech.speechrecogniser import SpeechRecogniser
 from shell.about import AboutPage
@@ -34,12 +33,7 @@ class Application(Gtk.Application, WindowModeSubscribers):
         self.current_window = None
 
         self._window_settings_handler = WindowConfigurationHandler(self)
-        self._window_settings_handler.load_settings()
-
-        # initialize settings once
-        self._speech_settings = SpeechSettingsHandler()
-        self._speech_settings.load_settings()
-        self.speech_recogniser = SpeechRecogniser(self._speech_settings)
+        self.speech_recogniser = SpeechRecogniser()
 
     def build_app_menu(self):
         action_entries = [

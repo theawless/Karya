@@ -4,6 +4,8 @@ from enum import Enum
 import speech_recognition as sr
 from gi.repository import GLib, GObject, Gtk
 
+from settings.speechsettings import SpeechSettingsHandler
+
 logger = logging.getLogger(__name__)
 PREPARE_DURATION = 2
 
@@ -37,7 +39,7 @@ class SpeechRecogniser(ThreadObject):
         'state_changed': (GObject.SIGNAL_RUN_FIRST, None, (object, str, str))
     }
 
-    def __init__(self, speech_settings):
+    def __init__(self):
         ThreadObject.__init__(self)
         self.source = None
         self.re = sr.Recognizer()
@@ -46,13 +48,10 @@ class SpeechRecogniser(ThreadObject):
         self.is_listening = False
         self.is_prepared = False
         self.noise_level = None
-        self.settings = speech_settings.config
-        print(self.settings['Main']['recogniser'])
+        self.settings = SpeechSettingsHandler().config
 
     # called automatically after each state change
     def do_state_changed(self, state, recognised_txt, msg):
-        print(self.settings['Main']['recogniser'])
-
         print('state_changed', state, recognised_txt, msg)
         if state is SpeechStates.fatal_error:
             self.stop_recognising()
