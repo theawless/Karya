@@ -1,3 +1,6 @@
+import gi
+
+gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GObject
 
 from settings.mainsettings import ConfigurationHandler
@@ -67,15 +70,11 @@ class SpeechConfigurableDialog(GObject.GObject):
         self.settings_handler = SpeechSettingsHandler(self)
         # simply update gui after each save
         self.settings_handler.connect('settings_loaded', self.on_settings_loaded)
-        self.settings_handler.connect('settings_saved', self.on_settings_saved)
         self.settings_handler.load_settings()
 
         self._connect_everything()
 
     def on_settings_loaded(self, settings_handler, config):
-        self._update(config)
-
-    def on_settings_saved(self, settings_handler, config):
         self._update(config)
 
     def _update(self, config):
@@ -97,6 +96,7 @@ class SpeechConfigurableDialog(GObject.GObject):
 
     def _radio_callback(self, radio):
         self.emit('settings_changed')
+        self._update(self.settings_handler.config)
 
     def _dynamic_check_callback(self, check):
         self.emit('settings_changed')

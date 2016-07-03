@@ -8,16 +8,17 @@ logger = logging.getLogger(__name__)
 
 
 class WindowConfigurationHandler(ConfigurationHandler):
-    def __init__(self, window):
-        super().__init__(window, WINDOW_STATE_INI_PATH)
+    def __init__(self, app):
+        super().__init__(app, WINDOW_STATE_INI_PATH)
 
     def save_settings(self, obj):
-        # TO DO modify gravity for better placement
-        self.config['Main'] = {'Window': self.obj.window_mode.name}
-        size = self.obj.get_size()
-        position = self.obj.get_position()
-        self.config[self.obj.window_mode.name] = {'position_X': position[0], 'position_Y': position[1],
-                                                  'size_X': size[0], 'size_Y': size[1]}
+        window = obj.current_window
+        name = window.mode.name
+        self.config['Main'] = {'Window': name}
+        position = window.get_position()
+        size = window.get_size()
+        self.config[name] = {'position_X': position[0], 'position_Y': position[1],
+                             'size_X': size[0], 'size_Y': size[1]}
         super().save_settings(obj)
 
     def default_settings(self):

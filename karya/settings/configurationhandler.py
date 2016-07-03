@@ -32,12 +32,11 @@ class ConfigurationHandler(GObject.GObject):
         'settings_loaded': (GObject.SIGNAL_RUN_FIRST, None, (object,)),
         'settings_saved': (GObject.SIGNAL_RUN_FIRST, None, (object,))
     }
-    # static variable in all instances
-    config = ListConfigParser()
 
     # acting as multiple constructor
     def __init__(self, obj=None, ini_path=None):
         GObject.GObject.__init__(self)
+        self.config = ListConfigParser()
         self.ini_path = ini_path
         if obj is not None:
             self.obj = obj
