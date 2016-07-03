@@ -1,16 +1,14 @@
 import gi
 
 from settings.speechsettings import SpeechSettingsHandler
-from shell.windowelements import WindowElements
-from speech.speechrecogniser import SpeechRecogniser, SpeechStates
+from speech.speechrecogniser import SpeechStates
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 
 
-class SpeechInfoBar(WindowElements):
-    def __init__(self, window):
-        super().__init__(window)
+class SpeechInfoBar:
+    def __init__(self, speech_recogniser):
 
         # initialize the speech settings once
         self.speech_settings = SpeechSettingsHandler()
@@ -23,8 +21,8 @@ class SpeechInfoBar(WindowElements):
         self.info_bar.modify_bg(Gtk.StateType.NORMAL, Gdk.Color.parse('gray')[1])
         self.info_bar.show()
 
-        self.speech_recogniser = SpeechRecogniser()
-        self.speech_recogniser.connect('state_changed', self.on_speech_state_changed)
+        self._speech_recogniser = speech_recogniser
+        self._speech_recogniser.connect('state_changed', self.on_speech_state_changed)
 
     def _setup_status_label(self):
         self.info_bar.set_message_type(Gtk.MessageType.OTHER)
@@ -54,10 +52,10 @@ class SpeechInfoBar(WindowElements):
         content_box.pack_start(self.mode_button, False, False, 0)
 
     def speech_button_clicked(self, widget):
-        if self.speech_recogniser.is_listening:
-            self.speech_recogniser.stop_recognising()
-        elif not self.speech_recogniser.is_listening:
-            self.speech_recogniser.start_recognising()
+        if self._speech_recogniser.is_listening:
+            self._speech_recogniser.stop_recognising()
+        elif not self._speech_recogniser.is_listening:
+            self._speech_recogniser.start_recognising()
 
     def on_speech_state_changed(self, speech_recogniser, state, recognised_text, msg):
         if state == SpeechStates.started:
@@ -78,9 +76,5 @@ class SpeechInfoBar(WindowElements):
             self.speech_status_label.set_text('Got it!')
         if state == SpeechStates.fatal_error:
             self.speech_error_label.set_text('Whoops! Fatal Error!')
-
-    def on_window_change_small(self):
-        self.info_bar.set_show_close_button(True)
-
-    def on_window_change_large(self):
-        self.info_bar.set_show_close_button(False)
+        while Gtk.events_pending():
+            Gtk.main_iteration_do(True)

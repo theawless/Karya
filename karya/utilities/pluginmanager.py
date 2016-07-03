@@ -36,13 +36,10 @@ class PluginManager(GObject.GObject):
         self.extension_set.connect("extension-removed", self.on_extension_removed)
 
         self.settings_handler = PluginConfigurationHandler(self, [''])
-        self.settings_handler.connect('settings_loaded', self.on_settings_loaded)
-        self.settings_handler.load_settings()
+        self.plugin_engine.set_loaded_plugins(self.settings_handler.config.get_list('Main', 'loaded_plugins'))
+
         self.plugin_engine.connect_after("load-plugin", self.on_load_plugin)
         self.plugin_engine.connect_after("unload-plugin", self.on_unload_plugin)
-
-    def on_settings_loaded(self, settings_handler, config):
-        self.plugin_engine.set_loaded_plugins(config.get_list('Main', 'loaded_plugins'))
 
     def on_load_plugin(self, plugin_engine, plugin):
         self.emit('settings_changed')

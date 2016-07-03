@@ -8,12 +8,12 @@ class WindowModes(Enum):
 
 
 # An interface for all elements that change with window modes
-class WindowElements:
-    def __init__(self, window):
-        if window is not None:
-            window.connect('mode-changed', self.on_window_change)
+class WindowModeSubscribers:
+    def __init__(self, app):
+        if app is not None:
+            app.connect('mode_changed', self.on_window_change)
 
-    def on_window_change(self, window, mode):
+    def on_window_change(self, app, mode):
         if mode == WindowModes.small:
             self.on_window_change_small()
         elif mode == WindowModes.large:

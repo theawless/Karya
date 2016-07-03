@@ -1,23 +1,26 @@
 import logging
 
-from settings.configurationhandler import ConfigurationHandler
+from settings.configurationhandler import ConfigurationHandler, ListConfigParser
 from shell.windowelements import WindowModes
-from utilities.variables import WINDOW_STATE_INI_PATH, LOADED_PLUGIN_INI_PATH
+from utilities.variables import LOADED_PLUGIN_INI_PATH, WINDOW_STATE_INI_PATH
 
 logger = logging.getLogger(__name__)
 
 
 class WindowConfigurationHandler(ConfigurationHandler):
-    def __init__(self, window):
-        super().__init__(window, WINDOW_STATE_INI_PATH)
+    config = ListConfigParser()
+
+    def __init__(self, app):
+        super().__init__(self.config, app, WINDOW_STATE_INI_PATH)
 
     def save_settings(self, obj):
-        # TO DO modify gravity for better placement
-        self.config['Main'] = {'Window': self.obj.window_mode.name}
-        size = self.obj.get_size()
-        position = self.obj.get_position()
-        self.config[self.obj.window_mode.name] = {'position_X': position[0], 'position_Y': position[1],
-                                                  'size_X': size[0], 'size_Y': size[1]}
+        window = obj.current_window
+        name = window.mode.name
+        self.config['Main'] = {'Window': name}
+        position = window.get_position()
+        size = window.get_size()
+        self.config[name] = {'position_X': position[0], 'position_Y': position[1],
+                             'size_X': size[0], 'size_Y': size[1]}
         super().save_settings(obj)
 
     def default_settings(self):
@@ -29,9 +32,11 @@ class WindowConfigurationHandler(ConfigurationHandler):
 
 
 class PluginConfigurationHandler(ConfigurationHandler):
+    config = ListConfigParser()
+
     def __init__(self, plugin_manager, default_plugins):
         self.default_plugins = default_plugins
-        super().__init__(plugin_manager, LOADED_PLUGIN_INI_PATH)
+        super().__init__(self.config, plugin_manager, LOADED_PLUGIN_INI_PATH)
 
     def save_settings(self, obj):
         plugin_list = self.obj.plugin_engine.get_loaded_plugins()

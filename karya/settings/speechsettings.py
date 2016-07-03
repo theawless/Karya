@@ -1,3 +1,8 @@
+import gi
+
+from settings.configurationhandler import ListConfigParser
+
+gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GObject
 
 from settings.mainsettings import ConfigurationHandler
@@ -5,12 +10,11 @@ from utilities.variables import SPEECH_SETTINGS_UI_PATH, SPEECH_INI_PATH
 
 
 class SpeechSettingsHandler(ConfigurationHandler):
-    # a static variable in all instances
+    # a class variable in all instances
+    config = ListConfigParser()
 
-    # acting like multiple constructors
     def __init__(self, obj=None):
-        super().__init__(obj, SPEECH_INI_PATH)
-        self.load_settings()
+        super().__init__(self.config, obj, SPEECH_INI_PATH)
 
     def default_settings(self):
         self.config['Main'] = {'recogniser': 'WITAI', 'dynamic_noise_suppression': 'False'}
@@ -65,18 +69,8 @@ class SpeechConfigurableDialog(GObject.GObject):
         self.dialog.show_all()
 
         self.settings_handler = SpeechSettingsHandler(self)
-        # simply update gui after each save
-        self.settings_handler.connect('settings_loaded', self.on_settings_loaded)
-        self.settings_handler.connect('settings_saved', self.on_settings_saved)
-        self.settings_handler.load_settings()
-
+        self._update(self.settings_handler.config)
         self._connect_everything()
-
-    def on_settings_loaded(self, settings_handler, config):
-        self._update(config)
-
-    def on_settings_saved(self, settings_handler, config):
-        self._update(config)
 
     def _update(self, config):
         self._choose_labelled_input_boxes(config)
@@ -97,6 +91,7 @@ class SpeechConfigurableDialog(GObject.GObject):
 
     def _radio_callback(self, radio):
         self.emit('settings_changed')
+        self._update(self.settings_handler.config)
 
     def _dynamic_check_callback(self, check):
         self.emit('settings_changed')

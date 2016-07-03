@@ -32,17 +32,18 @@ class ConfigurationHandler(GObject.GObject):
         'settings_loaded': (GObject.SIGNAL_RUN_FIRST, None, (object,)),
         'settings_saved': (GObject.SIGNAL_RUN_FIRST, None, (object,))
     }
-    # static variable in all instances
-    config = ListConfigParser()
 
     # acting as multiple constructor
-    def __init__(self, obj=None, ini_path=None):
+    def __init__(self, config, obj=None, ini_path=None):
         GObject.GObject.__init__(self)
+        # config we receive here is derived class' class variable
+        self.config = config
         self.ini_path = ini_path
         if obj is not None:
             self.obj = obj
             # must have settings_changed signal in obj
             self.obj.connect('settings_changed', self.save_settings)
+        self.load_settings()
 
     # virtual methods
 
