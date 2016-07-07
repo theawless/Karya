@@ -104,7 +104,7 @@ class SpeechRecogniser(ThreadObject):
             logger.debug("recognize speech using Sphinx")
             try:
                 recognized_text = r.recognize_sphinx(audio)
-                logger.debug("From recogSpeech module: " + recognized_text)
+                logger.debug("From recogniser module: " + recognized_text)
             except sr.UnknownValueError:
                 self.emit('state_changed', SpeechStates.error, "", "Sphinx could not understand audio")
             except sr.RequestError as e:
@@ -121,7 +121,7 @@ class SpeechRecogniser(ThreadObject):
                 logger.debug("recognize speech using Google Key Speech Recognition")
                 try:
                     recognized_text = r.recognize_google(audio, google_api_key)
-                    logger.debug("From recogSpeech module G : " + recognized_text)
+                    logger.debug("From recogniser module G : " + recognized_text)
                 except sr.UnknownValueError:
                     self.emit('state_changed', SpeechStates.error, "",
                               "Google Speech Recognition could not understand audio")
@@ -136,7 +136,7 @@ class SpeechRecogniser(ThreadObject):
                 logger.debug("recognize speech using Google Speech Recognition")
                 try:
                     recognized_text = r.recognize_google(audio)
-                    logger.debug("From recogSpeech module G : " + recognized_text)
+                    logger.debug("From recogniser module G : " + recognized_text)
                 except sr.UnknownValueError:
                     self.emit('state_changed', SpeechStates.error, "",
                               "Google Speech Recognition could not understand audio")

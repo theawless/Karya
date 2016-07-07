@@ -13,8 +13,10 @@ class SpeechSettingsHandler(ConfigurationHandler):
     # a class variable in all instances
     config = ListConfigParser()
 
-    def __init__(self, obj=None):
-        super().__init__(self.config, obj, SPEECH_INI_PATH)
+    def __init__(self, changer=None):
+        super().__init__(self.config, SPEECH_INI_PATH)
+        if changer is not None:
+            changer.connect('settings_changed', self.save_settings)
 
     def default_settings(self):
         self.config['Main'] = {'recogniser': 'WITAI', 'dynamic_noise_suppression': 'False'}
@@ -24,34 +26,33 @@ class SpeechSettingsHandler(ConfigurationHandler):
         self.config['APIAI'] = {'api_key': ''}
         self.config['Bing'] = {'api_key': ''}
         self.config['IBM'] = {'username': '', 'password': ''}
-        return self.config
 
     def save_settings(self, obj):
-        if self.obj.ui.get_object("sphinx_radio").get_active():
+        if obj.ui.get_object("sphinx_radio").get_active():
             self.config['Main']['recogniser'] = "Sphinx"
-        elif self.obj.ui.get_object("google_radio").get_active():
+        elif obj.ui.get_object("google_radio").get_active():
             self.config['Main']['recogniser'] = "Google"
-        elif self.obj.ui.get_object("witai_radio").get_active():
+        elif obj.ui.get_object("witai_radio").get_active():
             self.config['Main']['recogniser'] = "WITAI"
-        elif self.obj.ui.get_object("ibm_radio").get_active():
+        elif obj.ui.get_object("ibm_radio").get_active():
             self.config['Main']['recogniser'] = "IBM"
-        elif self.obj.ui.get_object("apiai_radio").get_active():
+        elif obj.ui.get_object("apiai_radio").get_active():
             self.config['Main']['recogniser'] = "APIAI"
-        elif self.obj.ui.get_object("bing_radio").get_active():
+        elif obj.ui.get_object("bing_radio").get_active():
             self.config['Main']['recogniser'] = "Bing"
 
-        if self.obj.ui.get_object("dynamic_check_button").get_active():
+        if obj.ui.get_object("dynamic_check_button").get_active():
             self.config['Main']['dynamic_noise_suppression'] = 'True'
         else:
             self.config['Main']['dynamic_noise_suppression'] = 'False'
 
-        self.config['Google']['api_key'] = self.obj.ui.get_object("google_key_entry").get_text()
-        self.config['Bing']['api_key'] = self.obj.ui.get_object("bing_key_entry").get_text()
-        self.config['WITAI']['api_key'] = self.obj.ui.get_object("witai_key_entry").get_text()
-        self.config['IBM']['username'] = self.obj.ui.get_object("ibm_username_entry").get_text()
-        self.config['IBM']['password'] = self.obj.ui.get_object("ibm_password_entry").get_text()
-        self.config['APIAI']['api_key'] = self.obj.ui.get_object("apiai_key_entry").get_text()
-        super().save_settings(obj)
+        self.config['Google']['api_key'] = obj.ui.get_object("google_key_entry").get_text()
+        self.config['Bing']['api_key'] = obj.ui.get_object("bing_key_entry").get_text()
+        self.config['WITAI']['api_key'] = obj.ui.get_object("witai_key_entry").get_text()
+        self.config['IBM']['username'] = obj.ui.get_object("ibm_username_entry").get_text()
+        self.config['IBM']['password'] = obj.ui.get_object("ibm_password_entry").get_text()
+        self.config['APIAI']['api_key'] = obj.ui.get_object("apiai_key_entry").get_text()
+        super().save_settings()
 
 
 class SpeechConfigurableDialog(GObject.GObject):
@@ -97,8 +98,8 @@ class SpeechConfigurableDialog(GObject.GObject):
         self.emit('settings_changed')
 
     def _set_default_config(self, button):
-        default_config = self.settings_handler.default_settings()
-        self._update(default_config)
+        self.settings_handler.default_settings()
+        self._update(self.settings_handler.config)
 
     def on_close_dialog(self, button):
         self.emit('settings_changed')
