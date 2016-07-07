@@ -2,7 +2,7 @@ import logging
 from enum import Enum
 
 import speech_recognition as sr
-from gi.repository import GLib, GObject, Gtk
+from gi.repository import GObject, GLib, Gtk
 
 from settings.speechsettings import SpeechSettingsHandler
 
@@ -23,24 +23,14 @@ class SpeechStates(Enum):
     fatal_error = 8
 
 
-class ThreadObject(GObject.GObject):
+class SpeechRecogniser(GObject.GObject):
+    __gsignals__ = {
+        'state_changed': (GObject.SIGNAL_RUN_LAST, None, (object, str, str))
+    }
+    state = GObject.property(type=object)
+
     def __init__(self):
         GObject.GObject.__init__(self)
-
-    def emit(self, *args):
-        # we emit signal in the main thread
-        GLib.idle_add(super().emit, *args)
-        while Gtk.events_pending():
-            Gtk.main_iteration_do(True)
-
-
-class SpeechRecogniser(ThreadObject):
-    __gsignals__ = {
-        'state_changed': (GObject.SIGNAL_RUN_FIRST, None, (object, str, str))
-    }
-
-    def __init__(self):
-        ThreadObject.__init__(self)
         self.source = None
         self.re = sr.Recognizer()
         self.mic = sr.Microphone()
@@ -49,10 +39,20 @@ class SpeechRecogniser(ThreadObject):
         self.is_prepared = False
         self.noise_level = None
         self.settings = SpeechSettingsHandler().config
+        self.set_property('state', SpeechStates.stopped)
+
+    def change_state(self, state, text, msg):
+        # we emit signal in the main thread
+        # change state in the main thread
+        GLib.idle_add(self.set_property, 'state', state)
+        GLib.idle_add(super().emit, 'state_changed', state, text, msg)
+        # finish gtk events -- not sure if this is the right place
+        while Gtk.events_pending():
+            Gtk.main_iteration()
 
     # called automatically after each state change
     def do_state_changed(self, state, recognised_txt, msg):
-        print('state_changed', state, recognised_txt, msg)
+        # print('state_changed', state, recognised_txt, msg)
         if state is SpeechStates.fatal_error:
             self.stop_recognising()
 
@@ -68,25 +68,25 @@ class SpeechRecogniser(ThreadObject):
             self.start_recognising()
 
     def setup_recogniser(self):
-        self.emit('state_changed', SpeechStates.preparing, "", "")
+        self.change_state(SpeechStates.preparing, "", "")
         if self.is_listening:
             self.re.adjust_for_ambient_noise(self.source, duration=PREPARE_DURATION)
-            self.emit('state_changed', SpeechStates.prepared, "", "")
+            self.change_state(SpeechStates.prepared, "", "")
         elif not self.is_listening:
             with self.mic as source:
                 self.source = source
                 self.re.adjust_for_ambient_noise(source, duration=PREPARE_DURATION)
-                self.emit('state_changed', SpeechStates.prepared, "", "")
+                self.change_state(SpeechStates.prepared, "", "")
         self.is_prepared = True
 
     def stop_recognising(self):
         if self.is_listening:
-            self.emit('state_changed', SpeechStates.stopping, "", "")
+            self.change_state(SpeechStates.stopping, "", "")
             self.re_stopper()
-            self.emit('state_changed', SpeechStates.stopped, '', "")
+            self.change_state("")
             self.is_listening = False
         else:
-            self.emit('state_changed', SpeechStates.stopped, "", "")
+            self.change_state(SpeechStates.stopped, "", "")
 
     def recog_callback(self, r, audio):
         """
@@ -100,55 +100,55 @@ class SpeechRecogniser(ThreadObject):
         # Recogniser begins
         if sel == "Sphinx":
             # Use Sphinx as recogniser
-            self.emit('state_changed', SpeechStates.recognising, "", "Got your words! Processing with Sphinx")
+            self.change_state(SpeechStates.recognising, "", "Got your words! Processing with Sphinx")
             logger.debug("recognize speech using Sphinx")
             try:
                 recognized_text = r.recognize_sphinx(audio)
                 logger.debug("From recogSpeech module: " + recognized_text)
             except sr.UnknownValueError:
-                self.emit('state_changed', SpeechStates.error, "", "Sphinx could not understand audio")
+                self.change_state(SpeechStates.error, "", "Sphinx could not understand audio")
             except sr.RequestError as e:
-                self.emit('state_changed', SpeechStates.fatal_error, "", "Sphinx error; {0}".format(e))
+                self.change_state(SpeechStates.fatal_error, "", "Sphinx error; {0}".format(e))
             finally:
-                self.emit('state_changed', SpeechStates.recognised, recognized_text, "")
+                self.change_state(SpeechStates.recognised, recognized_text, "")
 
         elif sel == "Google":
             if settings['Google']['api_key'] != "":
                 # Use Google with API KEY as recogniser
                 google_api_key = settings['Google']['api_key']
-                self.emit('state_changed', SpeechStates.recognising, "",
-                          "Got your words! Processing with Google Speech Recognition")
+                self.change_state(SpeechStates.recognising, "",
+                                  "Got your words! Processing with Google Speech Recognition")
                 logger.debug("recognize speech using Google Key Speech Recognition")
                 try:
                     recognized_text = r.recognize_google(audio, google_api_key)
                     logger.debug("From recogSpeech module G : " + recognized_text)
                 except sr.UnknownValueError:
-                    self.emit('state_changed', SpeechStates.error, "",
-                              "Google Speech Recognition could not understand audio")
+                    self.change_state(SpeechStates.error, "",
+                                      "Google Speech Recognition could not understand audio")
                 except sr.RequestError as e:
-                    self.emit('state_changed', SpeechStates.fatal_error, "",
-                              "Could not request results from Google Speech Recognition service; {0}".format(e))
+                    self.change_state(SpeechStates.fatal_error, "",
+                                      "Could not request results from Google Speech Recognition service; {0}".format(e))
                 finally:
-                    self.emit('state_changed', SpeechStates.recognised, recognized_text, "")
+                    self.change_state(SpeechStates.recognised, recognized_text, "")
             else:
-                self.emit('state_changed', SpeechStates.recognising, "",
-                          "Got your words! Processing with Google Speech Recognition")
+                self.change_state(SpeechStates.recognising, "",
+                                  "Got your words! Processing with Google Speech Recognition")
                 logger.debug("recognize speech using Google Speech Recognition")
                 try:
                     recognized_text = r.recognize_google(audio)
                     logger.debug("From recogSpeech module G : " + recognized_text)
                 except sr.UnknownValueError:
-                    self.emit('state_changed', SpeechStates.error, "",
-                              "Google Speech Recognition could not understand audio")
+                    self.change_state(SpeechStates.error, "",
+                                      "Google Speech Recognition could not understand audio")
                 except sr.RequestError as e:
-                    self.emit('state_changed', SpeechStates.fatal_error, "",
-                              "Could not request results from Google Speech Recognition service; {0}".format(e))
+                    self.change_state(SpeechStates.fatal_error, "",
+                                      "Could not request results from Google Speech Recognition service; {0}".format(e))
                 finally:
-                    self.emit('state_changed', SpeechStates.recognised, recognized_text, "")
+                    self.change_state(SpeechStates.recognised, recognized_text, "")
 
         elif sel == "WITAI":
             # recognize speech using Wit.ai
-            self.emit('state_changed', SpeechStates.recognising, "", "Got your words! Processing with WIT.AI")
+            self.change_state(SpeechStates.recognising, "", "Got your words! Processing with WIT.AI")
             logger.debug("recognize speech using WitAI Speech Recognition")
 
             wit_ai_key = settings['WITAI']['api_key']
@@ -157,33 +157,34 @@ class SpeechRecogniser(ThreadObject):
                 recognized_text = r.recognize_wit(audio, key=wit_ai_key)
                 logger.debug("Wit.ai thinks you said " + recognized_text)
             except sr.UnknownValueError:
-                self.emit('state_changed', SpeechStates.error, "", "Wit.ai could not understand audio")
+                self.change_state(SpeechStates.error, "", "Wit.ai could not understand audio")
             except sr.RequestError as e:
-                self.emit('state_changed', SpeechStates.fatal_error, "",
-                          "Could not request results from Wit.ai service; {0}".format(e))
+                self.change_state(SpeechStates.fatal_error, "",
+                                  "Could not request results from Wit.ai service; {0}".format(e))
             finally:
-                self.emit('state_changed', SpeechStates.recognised, recognized_text, "")
+                self.change_state(SpeechStates.recognised, recognized_text, "")
 
         elif sel == "Bing":
             # recognize speech using Microsoft Bing Voice Recognition
-            self.emit('state_changed', SpeechStates.recognising, "", "Got your words! Processing with Bing")
+            self.change_state(SpeechStates.recognising, "", "Got your words! Processing with Bing")
             logger.debug("recognize speech using Bing Speech Recognition")
             bing_key = settings['Bing']['api_key']
             try:
                 recognized_text = r.recognize_bing(audio, key=bing_key)
                 logger.debug("Microsoft Bing Voice Recognition thinks you said " + recognized_text)
             except sr.UnknownValueError:
-                self.emit('state_changed', SpeechStates.error, "",
-                          "Microsoft Bing Voice Recognition could not understand audio")
+                self.change_state(SpeechStates.error, "",
+                                  "Microsoft Bing Voice Recognition could not understand audio")
             except sr.RequestError as e:
-                self.emit('state_changed', SpeechStates.fatal_error, "",
-                          "Could not request results from Microsoft Bing Voice Recognition service; {0}".format(e))
+                self.change_state(SpeechStates.fatal_error, "",
+                                  "Could not request results from Microsoft Bing Voice Recognition service; {0}".format(
+                                      e))
             finally:
-                self.emit('state_changed', SpeechStates.recognised, recognized_text, "")
+                self.change_state(SpeechStates.recognised, recognized_text, "")
 
         elif sel == "APIAI":
             # recognize speech using api.ai
-            self.emit('state_changed', SpeechStates.recognising, "", "Got your words! Processing with API.AI")
+            self.change_state(SpeechStates.recognising, "", "Got your words! Processing with API.AI")
             logger.debug("recognize speech using APIAI Speech Recognition")
 
             api_ai_client_access_token = settings['APIAI']['api_key']
@@ -191,16 +192,16 @@ class SpeechRecogniser(ThreadObject):
                 recognized_text = r.recognize_api(audio, client_access_token=api_ai_client_access_token)
                 logger.debug("api.ai thinks you said " + recognized_text)
             except sr.UnknownValueError:
-                self.emit('state_changed', SpeechStates.error, "", "api.ai could not understand audio")
+                self.change_state(SpeechStates.error, "", "api.ai could not understand audio")
             except sr.RequestError as e:
-                self.emit('state_changed', SpeechStates.fatal_error, "",
-                          "Could not request results from api.ai service; {0}".format(e))
+                self.change_state(SpeechStates.fatal_error, "",
+                                  "Could not request results from api.ai service; {0}".format(e))
             finally:
-                self.emit('state_changed', SpeechStates.recognised, recognized_text, "")
+                self.change_state(SpeechStates.recognised, recognized_text, "")
 
         elif sel == "IBM":
             # recognize speech using IBM Speech to Text
-            self.emit('state_changed', SpeechStates.recognising, "", "Got your words! Processing with IBM")
+            self.change_state(SpeechStates.recognising, "", "Got your words! Processing with IBM")
             logger.debug("recognize speech using IBM Speech Recognition")
 
             ibm_username = settings['IBM']['username']
@@ -211,9 +212,10 @@ class SpeechRecogniser(ThreadObject):
                 recognized_text = r.recognize_ibm(audio, username=ibm_username, password=ibm_password)
                 logger.debug("IBM Speech to Text thinks you said " + recognized_text)
             except sr.UnknownValueError:
-                self.emit('state_changed', SpeechStates.error, "", "IBM Speech to Text could not understand audio")
+                self.change_state(SpeechStates.error, "",
+                                  "IBM Speech to Text could not understand audio")
             except sr.RequestError as e:
-                self.emit('state_changed', SpeechStates.fatal_error, "",
-                          "Could not request results from IBM Speech to Text service; {0}".format(e))
+                self.change_state(SpeechStates.fatal_error, "",
+                                  "Could not request results from IBM Speech to Text service; {0}".format(e))
             finally:
-                self.emit('state_changed', SpeechStates.recognised, recognized_text, "")
+                self.change_state(SpeechStates.recognised, recognized_text, "")

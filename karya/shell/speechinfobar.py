@@ -5,6 +5,9 @@ from speech.speechrecogniser import SpeechStates
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class SpeechInfoBar:
@@ -76,5 +79,6 @@ class SpeechInfoBar:
             self.speech_status_label.set_text('Got it!')
         if state == SpeechStates.fatal_error:
             self.speech_error_label.set_text('Whoops! Fatal Error!')
+
         while Gtk.events_pending():
-            Gtk.main_iteration_do(True)
+            Gtk.main_iteration()

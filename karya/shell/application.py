@@ -12,6 +12,7 @@ from gi.repository import Gtk, GLib, Gio, GObject
 from settings.mainsettings import WindowConfigurationHandler
 from shell.windowelements import WindowModeSubscribers, WindowModes
 from speech.speechrecogniser import SpeechRecogniser
+from speech.dictator import Dictator
 from shell.about import AboutPage
 
 logger = logging.getLogger(__name__)
@@ -34,6 +35,7 @@ class Application(Gtk.Application, WindowModeSubscribers):
 
         self._window_settings_handler = WindowConfigurationHandler(self)
         self.speech_recogniser = SpeechRecogniser()
+        self.dictator = Dictator(self.speech_recogniser)
 
     def build_app_menu(self):
         action_entries = [
