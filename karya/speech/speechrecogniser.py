@@ -25,7 +25,7 @@ class SpeechStates(Enum):
 
 class SpeechRecogniser(GObject.GObject):
     __gsignals__ = {
-        'state_changed': (GObject.SIGNAL_RUN_LAST, None, (object, str, str))
+        'state_changed': (GObject.SIGNAL_RUN_FIRST, None, (object, str, str))
     }
     state = GObject.property(type=object)
 
@@ -43,9 +43,7 @@ class SpeechRecogniser(GObject.GObject):
 
     def change_state(self, state, text, msg):
         # we emit signal in the main thread
-        # change state in the main thread
-        GLib.idle_add(self.set_property, 'state', state)
-        GLib.idle_add(super().emit, 'state_changed', state, text, msg)
+        GLib.idle_add(self.emit, 'state_changed', state, text, msg)
         # finish gtk events -- not sure if this is the right place
         while Gtk.events_pending():
             Gtk.main_iteration()
@@ -53,6 +51,7 @@ class SpeechRecogniser(GObject.GObject):
     # called automatically after each state change
     def do_state_changed(self, state, recognised_txt, msg):
         # print('state_changed', state, recognised_txt, msg)
+        self.set_property('state', state)
         if state is SpeechStates.fatal_error:
             self.stop_recognising()
 
@@ -83,10 +82,8 @@ class SpeechRecogniser(GObject.GObject):
         if self.is_listening:
             self.change_state(SpeechStates.stopping, "", "")
             self.re_stopper()
-            self.change_state("")
-            self.is_listening = False
-        else:
-            self.change_state(SpeechStates.stopped, "", "")
+        self.is_listening = False
+        self.change_state(SpeechStates.stopped, "", "")
 
     def recog_callback(self, r, audio):
         """
