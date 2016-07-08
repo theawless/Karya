@@ -34,25 +34,21 @@ class ConfigurationHandler(GObject.GObject):
     }
 
     # acting as multiple constructor
-    def __init__(self, config, obj=None, ini_path=None):
+    def __init__(self, config, ini_path=None):
         GObject.GObject.__init__(self)
         # config we receive here is derived class' class variable
         self.config = config
         self.ini_path = ini_path
-        if obj is not None:
-            self.obj = obj
-            # must have settings_changed signal in obj
-            self.obj.connect('settings_changed', self.save_settings)
         self.load_settings()
 
     # virtual methods
 
-    def save_settings(self, obj):
+    def save_settings(self, *args, **kwargs):
         with open(self.ini_path, 'w+') as configfile:
             self.config.write(configfile)
         self.emit('settings_saved', self.config)
 
-    def load_settings(self):
+    def load_settings(self, *args, **kwargs):
         self.default_settings()
         self.config.read(self.ini_path)
         self.emit('settings_loaded', self.config)

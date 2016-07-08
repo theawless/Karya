@@ -3,8 +3,8 @@ import sys
 
 import gi
 
-from shell.windows import WindowLarge
-from shell.windows import WindowSmall
+from shell.windows import WindowLarge, WindowSmall
+from utilities.dictation import DictationProvider
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GLib, Gio, GObject
