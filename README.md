@@ -20,6 +20,27 @@ A voice-controlled assistant for Linux.
   the home mode, show news, maybe recent updates, facebook
 - [x] Beautiful, follows GNOME human guidelines
 
+* * *
+
+### Screenshots
+* Large window 
+
+![alt text](images/large.png "Large")
+
+* Small window mode
+
+![alt text](images/small2.png "Small window mode")
+
+* Small window docked to terminal
+
+![alt text](images/small.png "Small window mode")
+
+* Plugin Support
+
+![alt text](images/plugin.png "Plugin support")
+
+* * *
+
 ### Plugins
 - [ ] Text templates plugin  
   example: say `insert joke` to fetch joke online and write it
@@ -52,27 +73,6 @@ A voice-controlled assistant for Linux.
     witai?
 * Use of hand gestures to control mouse
 * Eye gaze tracker to control mouse
-* * *
-### Screenshots
-* Large window 
-
-![alt text](images/large.png "Large")
-
-* Small window mode
-
-![alt text](images/small2.png "Small window mode")
-
-* Small window docked to terminal
-
-![alt text](images/small.png "Small window mode")
-
-* Plugin Support
-
-![alt text](images/plugin.png "Plugin support")
-
-* Settings dialog
-
-![alt text](images/settings.png "Settings")
 
 * * *
 ### Requirements
