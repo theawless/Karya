@@ -35,7 +35,6 @@ class Search(GObject.Object, Peas.Activatable):
         self.home_stack.set_visible_child_name('search')
 
     def do_activate(self):
-        print('search activated')
         self.activator.add_gui('search', 'Search', self.box, self.tool_button)
         self.box.show_all()
         self.tool_button.show_all()
@@ -45,5 +44,4 @@ class Search(GObject.Object, Peas.Activatable):
         pass
 
     def get_activator(self, activator):
-        print('search got activator')
         self.activator = activator
