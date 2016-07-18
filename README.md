@@ -1,6 +1,10 @@
 # Karya
 A voice-controlled assistant for Linux.
 
+### Aim
+* Control everything using voice control or hand gestures.
+* Render keyboards and mice useless.
+
 ### Features
 - [ ] Voice control
     - [ ] Open/close apps
